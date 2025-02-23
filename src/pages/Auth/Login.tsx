@@ -1,16 +1,26 @@
-import { login } from "@/store/slices/authSlice";
-import { useDispatch } from "react-redux";
+import { useAppDispatch } from "@/hooks/useAppDispatch";
+import { loginAsync } from "@/store/thunks/authThunks";
 import { useNavigate } from "react-router-dom";
 
 const Login = () => {
 
-  const dispatch = useDispatch();
+  const dispatch = useAppDispatch();
   const navigate = useNavigate();
 
-  const handleLogin = () => {
-    const userData = { name: "Abraham", email: "abraham@example.com" };
-    dispatch(login(userData));
-    navigate("/");
+  const handleLogin = async (e: React.FormEvent) => {
+    e.preventDefault();
+
+    const credentials = {
+      email: "admin@example.com",
+      password: "1234567",
+    };
+  
+    try {
+      await dispatch(loginAsync(credentials)).unwrap();
+      navigate("/");
+    } catch (error) {
+      console.error("Error al iniciar sesión:", error);
+    }
   };
 
   return (

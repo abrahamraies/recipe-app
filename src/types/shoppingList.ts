@@ -1,4 +1,8 @@
+import { IngredientDto } from "./ingredients";
+
 export interface ShopListDto {
-    userId: number;
-    ingredientId: number;
-  }
+  id: number;
+  userId: number;
+  ingredientId: number;
+  ingredient: IngredientDto;
+}

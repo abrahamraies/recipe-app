@@ -7,7 +7,7 @@ import { useAuth } from "@/hooks/useAuth";
 
 const Navbar = () => {
   const [isDarkMode, setIsDarkMode] = useState(false);
-  
+
   const user = useAuth();
   const dispatch = useDispatch();
 
@@ -23,7 +23,9 @@ const Navbar = () => {
           🍳 Recipe App
         </Link>
         <div className="flex flex-wrap items-center gap-4 md:gap-6">
-          <Link to="/recipes" className="hover:text-yellow-400 text-lg transition-colors">Recetas</Link>
+          <Link to="/recipes" className="hover:text-yellow-400 text-lg transition-colors">
+            Recetas
+          </Link>
           {user ? (
             <>
               <Link to="/favorites" className="hover:text-yellow-400">

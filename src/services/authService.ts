@@ -1,10 +1,13 @@
 import { RegisterUserDto } from "@/types/auth";
 import { api } from "./api";
-import axios from "axios";
 
+export const loginUser = async (credentials: { email: string; password: string }) => {
+  const response = await api.post("/auth/login", credentials);
+  return response.data;
+};
 
 export const registerUser = async (userData: RegisterUserDto) => {
-  const response = await axios.post("/api/auth/register", userData);
+  const response = await api.post("/auth/register", userData);
   return response.data;
 };
 
@@ -13,12 +16,7 @@ export const forgotPassword = async (email: string) => {
   return response.data;
 };
 
-export const resetPassword = async (email: string) => {
-  const response = await api.post(`/auth/forgot-password/${email}`);
-  return response.data;
-};
-
 export const verifyEmail = async (token: string) => {
-  const response = await axios.get(`/api/auth/verify-email?token=${token}`);
+  const response = await api.get(`/auth/verify-email?token=${token}`);
   return response.data;
 };

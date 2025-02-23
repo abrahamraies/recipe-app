@@ -10,7 +10,6 @@ import Profile from './pages/Profile';
 import Login from './pages/Auth/Login';
 import Register from './pages/Auth/Register';
 import ForgotPassword from './pages/Auth/ForgotPassword';
-import ResetPassword from './pages/Auth/ResetPassword';
 import Navbar from './components/Navbar';
 import ProtectedRoute from './components/ProtectedRoute';
 import NotFound from './pages/NotFound';
@@ -35,7 +34,6 @@ function App() {
             <Route path="/favorites" element={<Favorites />} />
             <Route path="/shopping-list" element={<ShoppingList />} />
             <Route path="/profile" element={<Profile />} />
-            <Route path="/reset-password" element={<ResetPassword />} />
           </Route>
           
           <Route path="*" element={<NotFound />} />

@@ -1,22 +1,41 @@
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 import { IngredientResponse } from "../../types/ingredients";
+import {
+    fetchIngredientsAsync,
+    searchIngredientsAsync,
+    autocompleteIngredientsAsync,
+  } from "../thunks/ingredientThunks";
 
 interface IngredientState {
   ingredients: IngredientResponse[];
   searchResults: IngredientResponse[];
+  loading: boolean;
+  error: string | null;
 }
 
 const initialState: IngredientState = {
   ingredients: [],
   searchResults: [],
+  loading: false,
+  error: null,
 };
 
 const ingredientSlice = createSlice({
   name: "ingredients",
   initialState,
   reducers: {
-    setIngredients: (state, action: PayloadAction<IngredientResponse[]>) => {
+    fetchIngredientsStart: (state) => {
+      state.loading = true;
+      state.error = null;
+    },
+    fetchIngredientsSuccess: (state, action: PayloadAction<IngredientResponse[]>) => {
       state.ingredients = action.payload;
+      state.loading = false;
+      state.error = null;
+    },
+    fetchIngredientsFailure: (state, action: PayloadAction<string>) => {
+      state.loading = false;
+      state.error = action.payload;
     },
     setSearchResults: (state, action: PayloadAction<IngredientResponse[]>) => {
       state.searchResults = action.payload;
@@ -25,7 +44,35 @@ const ingredientSlice = createSlice({
       state.searchResults = [];
     },
   },
+  extraReducers: (builder) => {
+    builder
+      .addCase(fetchIngredientsAsync.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+      })
+      .addCase(fetchIngredientsAsync.fulfilled, (state, action) => {
+        state.ingredients = action.payload;
+        state.loading = false;
+      })
+      .addCase(fetchIngredientsAsync.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.payload as string;
+      })
+      .addCase(searchIngredientsAsync.fulfilled, (state, action) => {
+        state.searchResults = action.payload;
+      })
+      .addCase(autocompleteIngredientsAsync.fulfilled, (state, action) => {
+        state.searchResults = action.payload;
+      });
+  },
 });
 
-export const { setIngredients, setSearchResults, clearSearchResults } = ingredientSlice.actions;
+export const {
+  fetchIngredientsStart,
+  fetchIngredientsSuccess,
+  fetchIngredientsFailure,
+  setSearchResults,
+  clearSearchResults,
+} = ingredientSlice.actions;
+
 export default ingredientSlice.reducer;
