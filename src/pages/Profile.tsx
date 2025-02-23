@@ -2,10 +2,12 @@ import { useSelector, useDispatch } from "react-redux";
 import { logout } from "@/store/slices/authSlice";
 import { Button } from "@/components/ui/button";
 import { RootState } from "@/store/store";
+import { useNavigate } from "react-router-dom";
 
 const Profile = () => {
   const user = useSelector((state: RootState) => state.auth.user);
   const dispatch = useDispatch();
+  const navigate = useNavigate();
 
   const handleLogout = () => {
     dispatch(logout());
@@ -29,8 +31,9 @@ const Profile = () => {
             <p className="mb-2"><strong>Email:</strong> {user.email}</p>
           </div>
           <div className="flex flex-col space-y-2">
-            <Button className="w-full bg-yellow-500 hover:bg-yellow-600">Editar Perfil</Button>
-            <Button className="w-full bg-blue-500 hover:bg-blue-600">Cambiar Contraseña</Button>
+            <Button onClick={() => navigate("/edit-profile")} className="w-full bg-blue-500 hover:bg-blue-600">
+              Editar Perfil
+            </Button>
             <Button onClick={handleLogout} className="w-full bg-red-500 hover:bg-red-600">
               Cerrar Sesión
             </Button>

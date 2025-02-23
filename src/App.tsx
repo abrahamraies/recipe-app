@@ -14,6 +14,7 @@ import Navbar from './components/Navbar';
 import ProtectedRoute from './components/ProtectedRoute';
 import NotFound from './pages/NotFound';
 import './index.css';
+import EditProfile from './pages/EditProfile';
 
 function App() {
   return (
@@ -34,6 +35,7 @@ function App() {
             <Route path="/favorites" element={<Favorites />} />
             <Route path="/shopping-list" element={<ShoppingList />} />
             <Route path="/profile" element={<Profile />} />
+            <Route path="/edit-profile" element={<EditProfile />} />
           </Route>
           
           <Route path="*" element={<NotFound />} />
