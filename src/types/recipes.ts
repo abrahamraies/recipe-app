@@ -1,3 +1,5 @@
+import { IngredientDto } from "./ingredients";
+
 export interface RecipeDto {
     id: number;
     title: string;
@@ -11,6 +13,7 @@ export interface RecipeDto {
   
   export interface RecipeIngredientDto {
     ingredientId: number;
+    ingredient: IngredientDto;
     quantity: number;
   }
   

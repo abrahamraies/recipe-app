@@ -16,6 +16,7 @@ import NotFound from './pages/NotFound';
 import './index.css';
 import EditProfile from './pages/EditProfile';
 import IngredientSearch from './pages/IngredientSearch';
+import RecipeDetails from './pages/RecipeDetails';
 
 function App() {
   return (
@@ -27,6 +28,7 @@ function App() {
           {/* Rutas Públicas */}
           <Route path="/" element={<Home />} />
           <Route path="/recipes" element={<Recipes />} />
+          <Route path="/recipe/:id" element={<RecipeDetails />} />
           <Route path="/ingredient-search" element={<IngredientSearch />} />
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />

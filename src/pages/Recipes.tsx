@@ -65,7 +65,11 @@ const Recipes = () => {
         <div>
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
             {paginatedRecipes.map((recipe) => (
-              <div key={recipe.id} className="bg-white dark:bg-gray-800 shadow-lg rounded-xl overflow-hidden">
+              <div 
+                key={recipe.id} 
+                className="bg-white dark:bg-gray-800 shadow-lg rounded-xl overflow-hidden" 
+                onClick={() => navigate(`/recipe/${recipe.id}`)}
+              >
                 <img
                   src={recipe.imageUrl || "https://via.placeholder.com/300"}
                   alt={recipe.title}
