@@ -15,6 +15,7 @@ import ProtectedRoute from './components/ProtectedRoute';
 import NotFound from './pages/NotFound';
 import './index.css';
 import EditProfile from './pages/EditProfile';
+import IngredientSearch from './pages/IngredientSearch';
 
 function App() {
   return (
@@ -26,6 +27,7 @@ function App() {
           {/* Rutas Públicas */}
           <Route path="/" element={<Home />} />
           <Route path="/recipes" element={<Recipes />} />
+          <Route path="/ingredient-search" element={<IngredientSearch />} />
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
           <Route path="/forgot-password" element={<ForgotPassword />} />

@@ -3,8 +3,10 @@ import { useAppDispatch, useAppSelector } from "@/hooks/useAppDispatch";
 import { fetchRecipesAsync } from "@/store/thunks/recipeThunks";
 import { Button } from "@/components/ui/button";
 import { RecipeDto } from "@/types/recipes";
+import { useNavigate } from "react-router-dom";
 
 const Recipes = () => {
+  const navigate = useNavigate();
   const dispatch = useAppDispatch();
   const { allRecipes, loading, error } = useAppSelector((state) => state.recipes);
   const [searchQuery, setSearchQuery] = useState("");
@@ -48,6 +50,13 @@ const Recipes = () => {
         placeholder="Buscar recetas..."
         className="w-full p-3 mb-6 border rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-yellow-400"
       />
+
+      <Button
+        onClick={() => navigate("/ingredient-search")}
+        className="w-full bg-blue-500 hover:bg-blue-600 mb-6"
+      >
+        Buscar por Ingredientes
+      </Button>
 
       {loading && <p className="text-center text-lg">Cargando recetas...</p>}
       {error && <p className="text-center text-red-500">{error}</p>}

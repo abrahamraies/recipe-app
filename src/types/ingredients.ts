@@ -2,7 +2,7 @@
 export interface IngredientDto {
   id?: number;
   name: string;
-  unit: string;
+  unit?: string;
 }
 
 export interface IngredientResponse {

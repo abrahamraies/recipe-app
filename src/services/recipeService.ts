@@ -17,6 +17,17 @@ export const getRecipe = async (id: number) => {
 export const searchRecipes = async (searchParams: RecipeSearchRequest) => {
   const response = await api.get("/recipes/search", {
     params: { ingredients: searchParams.ingredientIds },
+    paramsSerializer: (params) => {
+      return Object.keys(params)
+        .map((key) => {
+          const value = params[key];
+          if (Array.isArray(value)) {
+            return value.map((v) => `${encodeURIComponent(key)}=${encodeURIComponent(v)}`).join("&");
+          }
+          return `${encodeURIComponent(key)}=${encodeURIComponent(value)}`;
+        })
+        .join("&");
+    },
   });
   return response.data;
 };

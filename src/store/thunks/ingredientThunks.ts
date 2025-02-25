@@ -8,9 +8,9 @@ import {
 
 export const fetchIngredientsAsync = createAsyncThunk(
   "ingredients/fetch",
-  async (_, { rejectWithValue }) => {
+  async ({ pageNumber = 1, pageSize = 10 }: { pageNumber: number; pageSize: number }, { rejectWithValue }) => {
     try {
-      const response = await getIngredients();
+      const response = await getIngredients(pageNumber, pageSize);
       return response;
     } catch (error) {
       if (error && typeof error === "object" && "response" in error) {

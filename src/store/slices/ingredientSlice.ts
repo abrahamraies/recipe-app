@@ -6,24 +6,36 @@ import {
     autocompleteIngredientsAsync,
   } from "../thunks/ingredientThunks";
 
-interface IngredientState {
-  ingredients: IngredientResponse[];
-  searchResults: IngredientResponse[];
-  loading: boolean;
-  error: string | null;
-}
+  interface IngredientState {
+    ingredients: IngredientResponse[];
+    searchResults: IngredientResponse[];
+    loading: boolean;
+    error: string | null;
+    currentPage: number;
+    totalPages: number;
+    pageSize: number;
+  }
 
-const initialState: IngredientState = {
-  ingredients: [],
-  searchResults: [],
-  loading: false,
-  error: null,
-};
+  const initialState: IngredientState = {
+    ingredients: [],
+    searchResults: [],
+    loading: false,
+    error: null,
+    currentPage: 1,
+    totalPages: 1,
+    pageSize: 10,
+  };  
 
 const ingredientSlice = createSlice({
   name: "ingredients",
   initialState,
   reducers: {
+    setCurrentPage: (state, action: PayloadAction<number>) => {
+      state.currentPage = action.payload;
+    },
+    setPageSize: (state, action: PayloadAction<number>) => {
+      state.pageSize = action.payload;
+    },
     fetchIngredientsStart: (state) => {
       state.loading = true;
       state.error = null;
@@ -51,7 +63,7 @@ const ingredientSlice = createSlice({
         state.error = null;
       })
       .addCase(fetchIngredientsAsync.fulfilled, (state, action) => {
-        state.ingredients = action.payload;
+        state.ingredients = action.payload.data;
         state.loading = false;
       })
       .addCase(fetchIngredientsAsync.rejected, (state, action) => {
@@ -68,6 +80,8 @@ const ingredientSlice = createSlice({
 });
 
 export const {
+  setCurrentPage,
+  setPageSize,
   fetchIngredientsStart,
   fetchIngredientsSuccess,
   fetchIngredientsFailure,
