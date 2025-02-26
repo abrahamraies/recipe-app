@@ -11,7 +11,6 @@ export const getRecipes = async (pageNumber = 1, pageSize = 10): Promise<PagedRe
 
 export const getRecipe = async (id: number) => {
   const response = await api.get(`/recipes/${id}`);
-  console.log(response.data);
   return response.data;
 };
 

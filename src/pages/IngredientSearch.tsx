@@ -38,8 +38,14 @@ const IngredientSearch = () => {
   const handleSearchRecipes = async () => {
     const ingredientIds = selectedIngredients.map((i) => i.id);
     try {
-      await dispatch(searchRecipesAsync({ ingredientIds: ingredientIds.filter(id => id !== undefined) as number[] })).unwrap();
-      navigate("/recipes");
+        const recipes = await dispatch(
+            searchRecipesAsync({ ingredientIds: ingredientIds.filter(id => id !== undefined) as number[] })
+          ).unwrap();
+      if (recipes.length === 1) {
+        navigate(`/recipe/${recipes[0].id}`);
+      } else{
+        navigate("/recipes");
+      }
     } catch (error) {
       console.error("Error al buscar recetas:", error);
       alert("Ocurrió un error al buscar recetas.");
