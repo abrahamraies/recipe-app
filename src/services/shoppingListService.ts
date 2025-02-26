@@ -5,7 +5,7 @@ export const getShopList = async (userId: number) => {
   return response.data;
 };
 
-export const addToShopList = async (itemData: { userId: number; ingredientId: number }) => {
+export const addToShopList = async (itemData: { userId: number; itemId: number }) => {
   const response = await api.post("/shop-list", itemData);
   return response.data;
 };

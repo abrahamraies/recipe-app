@@ -6,16 +6,21 @@ import { Input } from "@/components/ui/input";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { useAppDispatch } from "@/hooks/useAppDispatch";
+import { useAppDispatch, useAppSelector } from "@/hooks/useAppDispatch";
 import { IngredientDto } from "@/types/ingredients";
 import { searchRecipesAsync } from "@/store/thunks/recipeThunks";
 import { useSelector } from "react-redux";
 import { RootState } from "@/store/store";
+import { toast } from "sonner";
+import { addItemAsync, fetchShopListAsync } from "@/store/thunks/shoppingListThunks";
+import { addItem } from "@/store/slices/shoppingListSlice";
 
 const IngredientSearch = () => {
   const navigate = useNavigate();
   const dispatch = useAppDispatch();
+  const user = useAppSelector((state) => state.auth.user);
   const { ingredients } = useSelector((state: RootState) => state.ingredients);
+  const shoppingListItems = useSelector((state: RootState) => state.shoppingList.addItems);
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedIngredients, setSelectedIngredients] = useState<IngredientDto[]>([]);
   const [pageNumber, setPageNumber] = useState(1);
@@ -23,7 +28,10 @@ const IngredientSearch = () => {
 
   useEffect(() => {
     dispatch(fetchIngredientsAsync({ pageNumber: 1, pageSize: 1000 }));
-  }, [dispatch]);
+    if (user) {
+        dispatch(fetchShopListAsync(user.id!));
+      }
+  }, [dispatch,user]);
 
   const handleSelectIngredient = (ingredient: IngredientDto) => {
     if (!selectedIngredients.some((i) => i.id === ingredient.id)) {
@@ -52,6 +60,27 @@ const IngredientSearch = () => {
     }
   };
 
+  const handleAddToCart = async (ingredientId: number) => {
+    if (!user) {
+      toast.error("Debes iniciar sesión para agregar elementos al carrito.");
+      return;
+    }
+
+    if (shoppingListItems.includes(ingredientId)) {
+        toast.error("El ingrediente ya está en el carrito.");
+        return;
+      }
+
+    try {
+    await dispatch(addItemAsync({ userId: user.id!, itemId: ingredientId })).unwrap();
+    dispatch(addItem(ingredientId));
+    toast.success("Ingrediente agregado al carrito.");
+    } catch (error) {
+    console.error("Error al agregar al carrito:", error);
+    toast.error("No se pudo agregar el ingrediente al carrito.");
+    }
+  };
+
   const filteredIngredients = searchQuery.trim()
     ? ingredients.filter((ingredient: IngredientDto) =>
         ingredient.name.toLowerCase().includes(searchQuery.toLowerCase())
@@ -74,12 +103,10 @@ const IngredientSearch = () => {
 
   return (
     <div className="mt-8 p-4 md:p-6">
-      {/* Título */}
       <h1 className="text-3xl font-bold text-center text-gray-800 dark:text-gray-200 mb-6">
         Buscar por Ingredientes
       </h1>
 
-      {/* Barra de Búsqueda */}
       <Input
         type="text"
         value={searchQuery}
@@ -88,7 +115,6 @@ const IngredientSearch = () => {
         className="w-full p-3 mb-6 border rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-yellow-400 dark:bg-gray-700 dark:text-white"
       />
 
-      {/* Ingredientes Seleccionados */}
       <div className="mb-6">
         <h2 className="text-lg font-semibold text-gray-800 dark:text-gray-200 mb-2">Ingredientes Seleccionados:</h2>
         <ScrollArea className="h-20 border rounded-md p-2 dark:bg-gray-800">
@@ -112,7 +138,6 @@ const IngredientSearch = () => {
         </ScrollArea>
       </div>
 
-      {/* Botón para Buscar Recetas */}
       <div className="flex justify-center mt-6">
         <Button
           onClick={handleSearchRecipes}
@@ -123,7 +148,6 @@ const IngredientSearch = () => {
         </Button>
       </div>
 
-      {/* Lista de Ingredientes */}
       <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6 mt-6">
         {paginatedIngredients.map((ingredient) => (
           <Card key={ingredient.id} className="p-4 bg-white dark:bg-gray-800 shadow-md rounded-lg">
@@ -139,10 +163,15 @@ const IngredientSearch = () => {
                   Seleccionar
                 </Button>
                 <Button
-                  onClick={() => console.log("Agregar al carrito:", ingredient.name)}
-                  className="w-full bg-blue-500 hover:bg-blue-600 dark:bg-blue-600 dark:hover:bg-blue-700"
+                  onClick={() => handleAddToCart(ingredient.id!)}
+                  disabled={shoppingListItems.includes(ingredient.id!)}
+                  className={`w-full ${
+                    shoppingListItems.includes(ingredient.id!)
+                      ? "bg-gray-400 cursor-not-allowed"
+                      : "bg-blue-500 hover:bg-blue-600 dark:bg-blue-600 dark:hover:bg-blue-700"
+                  }`}
                 >
-                  Agregar al Carrito
+                  {shoppingListItems.includes(ingredient.id!) ? "Agregado" : "Agregar al Carrito"}
                 </Button>
               </div>
             </CardContent>
@@ -150,7 +179,6 @@ const IngredientSearch = () => {
         ))}
       </div>
 
-      {/* Paginación */}
       <div className="flex justify-center mt-6 space-x-4">
         <Button
           onClick={handlePrevPage}

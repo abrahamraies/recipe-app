@@ -23,7 +23,7 @@ export const fetchShopListAsync = createAsyncThunk(
 
 export const addItemAsync = createAsyncThunk(
   "shoppingList/add",
-  async (itemData: { userId: number; ingredientId: number }, { rejectWithValue }) => {
+  async (itemData: { userId: number; itemId: number }, { rejectWithValue }) => {
     try {
       const response = await addToShopList(itemData);
       return response;

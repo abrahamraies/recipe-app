@@ -8,12 +8,14 @@ import {
 
 interface ShoppingListState {
   items: ShopListDto[];
+  addItems: number[];
   loading: boolean;
   error: string | null;
 }
 
 const initialState: ShoppingListState = {
   items: [],
+  addItems: [],
   loading: false,
   error: null,
 };
@@ -35,8 +37,10 @@ const shoppingListSlice = createSlice({
       state.loading = false;
       state.error = action.payload;
     },
-    addItem: (state, action: PayloadAction<ShopListDto>) => {
-      state.items.push(action.payload);
+    addItem: (state, action: PayloadAction<number>) => {
+      if (!state.addItems.includes(action.payload)) {
+        state.addItems.push(action.payload);
+      }
     },
     removeItem: (state, action: PayloadAction<number>) => {
       state.items = state.items.filter((item) => item.ingredientId !== action.payload);
