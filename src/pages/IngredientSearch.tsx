@@ -9,18 +9,16 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { useAppDispatch, useAppSelector } from "@/hooks/useAppDispatch";
 import { IngredientDto } from "@/types/ingredients";
 import { searchRecipesAsync } from "@/store/thunks/recipeThunks";
-import { useSelector } from "react-redux";
 import { RootState } from "@/store/store";
 import { toast } from "sonner";
 import { addItemAsync, fetchShopListAsync } from "@/store/thunks/shoppingListThunks";
-import { addItem } from "@/store/slices/shoppingListSlice";
 
 const IngredientSearch = () => {
   const navigate = useNavigate();
   const dispatch = useAppDispatch();
   const user = useAppSelector((state) => state.auth.user);
-  const { ingredients } = useSelector((state: RootState) => state.ingredients);
-  const shoppingListItems = useSelector((state: RootState) => state.shoppingList.addItems);
+  const { ingredients } = useAppSelector((state: RootState) => state.ingredients);
+  const shoppingListItems = useAppSelector((state: RootState) => state.shoppingList.items);
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedIngredients, setSelectedIngredients] = useState<IngredientDto[]>([]);
   const [pageNumber, setPageNumber] = useState(1);
@@ -29,9 +27,9 @@ const IngredientSearch = () => {
   useEffect(() => {
     dispatch(fetchIngredientsAsync({ pageNumber: 1, pageSize: 1000 }));
     if (user) {
-        dispatch(fetchShopListAsync(user.id!));
-      }
-  }, [dispatch,user]);
+      dispatch(fetchShopListAsync(user.id!));
+    }
+  }, [dispatch, user]);
 
   const handleSelectIngredient = (ingredient: IngredientDto) => {
     if (!selectedIngredients.some((i) => i.id === ingredient.id)) {
@@ -44,19 +42,17 @@ const IngredientSearch = () => {
   };
 
   const handleSearchRecipes = async () => {
-    const ingredientIds = selectedIngredients.map((i) => i.id);
+    const ingredientIds = selectedIngredients.map((i) => i.id).filter(Boolean) as number[];
     try {
-        const recipes = await dispatch(
-            searchRecipesAsync({ ingredientIds: ingredientIds.filter(id => id !== undefined) as number[] })
-          ).unwrap();
+      const recipes = await dispatch(searchRecipesAsync({ ingredientIds })).unwrap();
       if (recipes.length === 1) {
         navigate(`/recipe/${recipes[0].id}`);
-      } else{
+      } else {
         navigate("/recipes");
       }
     } catch (error) {
       console.error("Error al buscar recetas:", error);
-      alert("Ocurrió un error al buscar recetas.");
+      toast.error("Ocurrió un error al buscar recetas.");
     }
   };
 
@@ -66,18 +62,18 @@ const IngredientSearch = () => {
       return;
     }
 
-    if (shoppingListItems.includes(ingredientId)) {
-        toast.error("El ingrediente ya está en el carrito.");
-        return;
-      }
+    const isAlreadyInCart = shoppingListItems.some((item) => item.ingredient.id === ingredientId);
+    if (isAlreadyInCart) {
+      toast.error("El ingrediente ya está en el carrito.");
+      return;
+    }
 
     try {
-    await dispatch(addItemAsync({ userId: user.id!, itemId: ingredientId })).unwrap();
-    dispatch(addItem(ingredientId));
-    toast.success("Ingrediente agregado al carrito.");
+      await dispatch(addItemAsync({ userId: user.id!, itemId: ingredientId })).unwrap();
+      toast.success("Ingrediente agregado al carrito.");
     } catch (error) {
-    console.error("Error al agregar al carrito:", error);
-    toast.error("No se pudo agregar el ingrediente al carrito.");
+      console.error("Error al agregar al carrito:", error);
+      toast.error("No se pudo agregar el ingrediente al carrito.");
     }
   };
 
@@ -106,7 +102,6 @@ const IngredientSearch = () => {
       <h1 className="text-3xl font-bold text-center text-gray-800 dark:text-gray-200 mb-6">
         Buscar por Ingredientes
       </h1>
-
       <Input
         type="text"
         value={searchQuery}
@@ -114,7 +109,6 @@ const IngredientSearch = () => {
         placeholder="Buscar ingredientes..."
         className="w-full p-3 mb-6 border rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-yellow-400 dark:bg-gray-700 dark:text-white"
       />
-
       <div className="mb-6">
         <h2 className="text-lg font-semibold text-gray-800 dark:text-gray-200 mb-2">Ingredientes Seleccionados:</h2>
         <ScrollArea className="h-20 border rounded-md p-2 dark:bg-gray-800">
@@ -137,7 +131,6 @@ const IngredientSearch = () => {
           </div>
         </ScrollArea>
       </div>
-
       <div className="flex justify-center mt-6">
         <Button
           onClick={handleSearchRecipes}
@@ -147,38 +140,42 @@ const IngredientSearch = () => {
           Buscar Receta
         </Button>
       </div>
-
       <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6 mt-6">
-        {paginatedIngredients.map((ingredient) => (
-          <Card key={ingredient.id} className="p-4 bg-white dark:bg-gray-800 shadow-md rounded-lg">
-            <CardContent>
-              <h3 className="text-lg font-semibold text-gray-800 dark:text-gray-200 mb-2">
-                {ingredient.name}
-              </h3>
-              <div className="flex justify-between space-x-2">
-                <Button
-                  onClick={() => handleSelectIngredient(ingredient)}
-                  className="w-full bg-green-500 hover:bg-green-600 dark:bg-green-600 dark:hover:bg-green-700"
-                >
-                  Seleccionar
-                </Button>
-                <Button
-                  onClick={() => handleAddToCart(ingredient.id!)}
-                  disabled={shoppingListItems.includes(ingredient.id!)}
-                  className={`w-full ${
-                    shoppingListItems.includes(ingredient.id!)
-                      ? "bg-gray-400 cursor-not-allowed"
-                      : "bg-blue-500 hover:bg-blue-600 dark:bg-blue-600 dark:hover:bg-blue-700"
-                  }`}
-                >
-                  {shoppingListItems.includes(ingredient.id!) ? "Agregado" : "Agregar al Carrito"}
-                </Button>
-              </div>
-            </CardContent>
-          </Card>
-        ))}
-      </div>
+        {paginatedIngredients.map((ingredient) => {
+          const isAlreadyInCart = shoppingListItems.some(
+            (item) => item.ingredient.id === ingredient.id
+          );
 
+          return (
+            <Card key={ingredient.id} className="p-4 bg-white dark:bg-gray-800 shadow-md rounded-lg">
+              <CardContent>
+                <h3 className="text-lg font-semibold text-gray-800 dark:text-gray-200 mb-2">
+                  {ingredient.name}
+                </h3>
+                <div className="flex justify-between space-x-2">
+                  <Button
+                    onClick={() => handleSelectIngredient(ingredient)}
+                    className="w-full bg-green-500 hover:bg-green-600 dark:bg-green-600 dark:hover:bg-green-700"
+                  >
+                    Seleccionar
+                  </Button>
+                  <Button
+                    onClick={() => handleAddToCart(ingredient.id!)}
+                    disabled={isAlreadyInCart}
+                    className={`w-full ${
+                      isAlreadyInCart
+                        ? "bg-gray-400 cursor-not-allowed"
+                        : "bg-blue-500 hover:bg-blue-600 dark:bg-blue-600 dark:hover:bg-blue-700"
+                    }`}
+                  >
+                    {isAlreadyInCart ? "Agregado" : "Agregar al Carrito"}
+                  </Button>
+                </div>
+              </CardContent>
+            </Card>
+          );
+        })}
+      </div>
       <div className="flex justify-center mt-6 space-x-4">
         <Button
           onClick={handlePrevPage}

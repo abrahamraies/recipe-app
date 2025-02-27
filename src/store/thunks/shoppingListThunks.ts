@@ -23,10 +23,10 @@ export const fetchShopListAsync = createAsyncThunk(
 
 export const addItemAsync = createAsyncThunk(
   "shoppingList/add",
-  async (itemData: { userId: number; itemId: number }, { rejectWithValue }) => {
+  async (itemData: { userId: number; itemId: number }, { dispatch, rejectWithValue }) => {
     try {
-      const response = await addToShopList(itemData);
-      return response;
+      await addToShopList(itemData);
+      await dispatch(fetchShopListAsync(itemData.userId));
     } catch (error) {
       if (error && typeof error === "object" && "response" in error) {
         const axiosError = error as { response?: { data: unknown } };
