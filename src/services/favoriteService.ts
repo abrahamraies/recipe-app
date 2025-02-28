@@ -15,8 +15,3 @@ export const removeFavorite = async (userId: number, recipeId: number) => {
   const response = await api.delete(`/favorites/?userId=${userId}&recipeId=${recipeId}`);
   return response.data;
 };
-
-export const checkFavorite = async (userId: number, recipeId: number) => {
-  const response = await api.get(`/favorites/check?userId=${userId}&recipeId=${recipeId}`);
-  return response.data;
-};

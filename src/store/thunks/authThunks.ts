@@ -2,8 +2,7 @@ import { createAsyncThunk } from "@reduxjs/toolkit";
 import {
   loginUser,
   registerUser,
-  forgotPassword,
-  verifyEmail,
+  forgotPassword
 } from "../../services/authService";
 import { RegisterUserDto } from "@/types/auth";
 
@@ -51,22 +50,6 @@ export const forgotPasswordAsync = createAsyncThunk(
         return rejectWithValue(axiosError.response?.data || "Error al recuperar contraseña");
         }
       return rejectWithValue("Error desconocido al recuperar contraseña");
-    }
-  }
-);
-
-export const verifyEmailAsync = createAsyncThunk(
-  "auth/verifyEmail",
-  async (token: string, { rejectWithValue }) => {
-    try {
-      const response = await verifyEmail(token);
-      return response;
-    } catch (error) {
-        if (error && typeof error === "object" && "response" in error) {
-            const axiosError = error as { response?: { data: unknown } };
-        return rejectWithValue(axiosError.response?.data || "Error al verificar email");
-        }
-      return rejectWithValue("Error desconocido al verificar email");
     }
   }
 );

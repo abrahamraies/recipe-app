@@ -3,8 +3,7 @@ import { FavoriteDto } from "../../types/favorites";
 import {
     fetchFavoritesAsync,
     addFavoriteAsync,
-    removeFavoriteAsync,
-    checkFavoriteAsync,
+    removeFavoriteAsync
 } from "../thunks/favoriteThunks";
 
 interface FavoritesState {
@@ -55,8 +54,6 @@ const favoriteSlice = createSlice({
             })
             .addCase(removeFavoriteAsync.fulfilled, (state, action) => {
                 state.items = action.payload;
-            })
-            .addCase(checkFavoriteAsync.fulfilled, () => {
             });
     },
 });

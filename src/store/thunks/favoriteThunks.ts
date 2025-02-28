@@ -2,8 +2,7 @@ import { createAsyncThunk } from "@reduxjs/toolkit";
 import {
   getFavorites,
   addFavorite,
-  removeFavorite,
-  checkFavorite,
+  removeFavorite
 } from "../../services/favoriteService";
 
 export const fetchFavoritesAsync = createAsyncThunk(
@@ -50,22 +49,6 @@ export const removeFavoriteAsync = createAsyncThunk(
         return rejectWithValue(axiosError.response?.data || "Error al eliminar favorito");
       }
       return rejectWithValue("Error desconocido al eliminar favorito");
-    }
-  }
-);
-
-export const checkFavoriteAsync = createAsyncThunk(
-  "favorites/check",
-  async ({ userId, recipeId }: { userId: number; recipeId: number }, { rejectWithValue }) => {
-    try {
-      const response = await checkFavorite(userId, recipeId);
-      return response;
-    } catch (error) {
-        if (error && typeof error === "object" && "response" in error) {
-            const axiosError = error as { response?: { data: unknown } };
-            return rejectWithValue(axiosError.response?.data || "Error al verificar favorito");
-          }
-          return rejectWithValue("Error desconocido al verificar favorito");
     }
   }
 );

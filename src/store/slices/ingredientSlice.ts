@@ -2,8 +2,6 @@ import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 import { IngredientResponse } from "../../types/ingredients";
 import {
     fetchIngredientsAsync,
-    searchIngredientsAsync,
-    autocompleteIngredientsAsync,
   } from "../thunks/ingredientThunks";
 
   interface IngredientState {
@@ -69,12 +67,6 @@ const ingredientSlice = createSlice({
       .addCase(fetchIngredientsAsync.rejected, (state, action) => {
         state.loading = false;
         state.error = action.payload as string;
-      })
-      .addCase(searchIngredientsAsync.fulfilled, (state, action) => {
-        state.searchResults = action.payload;
-      })
-      .addCase(autocompleteIngredientsAsync.fulfilled, (state, action) => {
-        state.searchResults = action.payload;
       });
   },
 });

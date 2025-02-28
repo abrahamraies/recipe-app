@@ -2,8 +2,7 @@ import { createSlice } from "@reduxjs/toolkit";
 import {
   loginAsync,
   registerAsync,
-  forgotPasswordAsync,
-  verifyEmailAsync,
+  forgotPasswordAsync
 } from "../thunks/authThunks";
 
 interface AuthState {
@@ -88,18 +87,6 @@ const authSlice = createSlice({
         state.loading = false;
         state.error = action.payload as string;
       })
-
-      .addCase(verifyEmailAsync.pending, (state) => {
-        state.loading = true;
-        state.error = null;
-      })
-      .addCase(verifyEmailAsync.fulfilled, (state) => {
-        state.loading = false;
-      })
-      .addCase(verifyEmailAsync.rejected, (state, action) => {
-        state.loading = false;
-        state.error = action.payload as string;
-      });
   },
 });
 
