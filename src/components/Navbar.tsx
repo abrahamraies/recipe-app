@@ -1,20 +1,12 @@
-import { useState } from "react";
 import { Link } from "react-router-dom";
-import { Button } from "@/components/ui/button";
 import { useDispatch } from "react-redux";
 import { logout } from "@/store/slices/authSlice";
 import { useAuth } from "@/hooks/useAuth";
 
 const Navbar = () => {
-  const [isDarkMode, setIsDarkMode] = useState(false);
 
   const user = useAuth();
   const dispatch = useDispatch();
-
-  const toggleDarkMode = () => {
-    setIsDarkMode(!isDarkMode);
-    document.documentElement.classList.toggle("dark");
-  };
 
   return (
     <nav className="bg-background text-foreground p-4 shadow-md">
@@ -54,13 +46,6 @@ const Navbar = () => {
               </Link>
             </>
           )}
-          <Button
-            onClick={toggleDarkMode}
-            variant="default"
-            className="bg-yellow-500 hover:bg-yellow-600 px-4 py-2 rounded-md"
-          >
-            {isDarkMode ? "Modo Claro" : "Modo Oscuro"}
-          </Button>
         </div>
       </div>
     </nav>

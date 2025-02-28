@@ -51,10 +51,10 @@ const favoriteSlice = createSlice({
                 state.error = action.payload as string;
             })
             .addCase(addFavoriteAsync.fulfilled, (state, action) => {
-                state.items.push(action.payload);
+                state.items = action.payload;
             })
             .addCase(removeFavoriteAsync.fulfilled, (state, action) => {
-                state.items = state.items.filter((fav) => fav.recipeId !== action.payload);
+                state.items = action.payload;
             })
             .addCase(checkFavoriteAsync.fulfilled, () => {
             });

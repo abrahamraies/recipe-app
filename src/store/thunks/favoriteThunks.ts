@@ -5,7 +5,6 @@ import {
   removeFavorite,
   checkFavorite,
 } from "../../services/favoriteService";
-import { FavoriteDto } from "@/types/favorites";
 
 export const fetchFavoritesAsync = createAsyncThunk(
   "favorites/fetch",
@@ -25,32 +24,32 @@ export const fetchFavoritesAsync = createAsyncThunk(
 
 export const addFavoriteAsync = createAsyncThunk(
   "favorites/add",
-  async (favoriteData: FavoriteDto, { rejectWithValue }) => {
+  async ({ userId, recipeId }: { userId: number; recipeId: number }, { rejectWithValue }) => {
     try {
-      const response = await addFavorite(favoriteData);
+      const response = await addFavorite(userId, recipeId);
       return response;
     } catch (error) {
-        if (error && typeof error === "object" && "response" in error) {
-            const axiosError = error as { response?: { data: unknown } };
-            return rejectWithValue(axiosError.response?.data || "Error al agregar favorito");
-          }
-          return rejectWithValue("Error desconocido al agregar favorito");
+      if (error && typeof error === "object" && "response" in error) {
+        const axiosError = error as { response?: { data: unknown } };
+        return rejectWithValue(axiosError.response?.data || "Error al agregar favorito");
+      }
+      return rejectWithValue("Error desconocido al agregar favorito");
     }
   }
 );
 
 export const removeFavoriteAsync = createAsyncThunk(
   "favorites/remove",
-  async (favoriteId: number, { rejectWithValue }) => {
+  async ({ userId, recipeId }: { userId: number, recipeId: number }, { rejectWithValue }) => {
     try {
-      await removeFavorite(favoriteId);
-      return favoriteId;
+      const updatedFavorites = await removeFavorite(userId, recipeId);
+      return updatedFavorites;
     } catch (error) {
-        if (error && typeof error === "object" && "response" in error) {
-            const axiosError = error as { response?: { data: unknown } };
-            return rejectWithValue(axiosError.response?.data || "Error al quitar favorito");
-          }
-          return rejectWithValue("Error desconocido al quitar favorito");
+      if (error && typeof error === "object" && "response" in error) {
+        const axiosError = error as { response?: { data: unknown } };
+        return rejectWithValue(axiosError.response?.data || "Error al eliminar favorito");
+      }
+      return rejectWithValue("Error desconocido al eliminar favorito");
     }
   }
 );

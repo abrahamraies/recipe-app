@@ -12,7 +12,7 @@ const Favorites = () => {
 
   useEffect(() => {
     if (favorites.length > 0) {
-      setFavoriteRecipes(favorites.map((fav) => fav.recipe));
+      setFavoriteRecipes(favorites.map((fav) => fav.recipe!));
     } else {
       setFavoriteRecipes([]);
     }
@@ -33,7 +33,7 @@ const Favorites = () => {
               <div className="p-5">
                 <h3 className="text-xl font-semibold mb-2 text-gray-800 dark:text-gray-200">{recipe.title}</h3>
                 <Button
-                  onClick={() => handleRemoveFavorite(recipe.id)}
+                  onClick={() => handleRemoveFavorite(userId!, recipe.id)}
                   className="w-full bg-red-500 hover:bg-red-600 text-white font-semibold py-2 rounded-md"
                 >
                   Eliminar de Favoritos
