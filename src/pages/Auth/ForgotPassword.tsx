@@ -6,18 +6,24 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Link } from "react-router-dom";
 import { forgotPassword } from "@/services/authService";
+import { toast } from "sonner";
 
-const schema = yup.object({
-  email: yup
-    .string()
-    .email("Ingresa un correo válido")
-    .required("El correo electrónico es obligatorio"),
-});
+const ErrorMessage = ({ message }: { message: string | undefined }) => (
+  <p className="text-red-500 text-sm mt-1">{message}</p>
+);
 
 const ForgotPassword = () => {
-  const [isLoading, setIsLoading] = useState(false);
-  const [message, setMessage] = useState("");
-  const [isSuccess, setIsSuccess] = useState(false);
+  const [state, setState] = useState({
+    isLoading: false,
+    message: "",
+    isSuccess: false,
+  });
+
+  const schema = yup.object().shape({
+    email: yup.string()
+      .email("Ingresa un correo válido")
+      .required("El correo electrónico es obligatorio"),
+  });
 
   const {
     register,
@@ -28,20 +34,24 @@ const ForgotPassword = () => {
   });
 
   const onSubmit = async (data: { email: string }) => {
-    setIsLoading(true);
-    setMessage("");
+    setState((prev) => ({ ...prev, isLoading: true, message: "" }));
     try {
       await forgotPassword(data.email);
-      setMessage("Se ha enviado un enlace de restablecimiento a tu correo.");
-      setIsSuccess(true);
+      setState((prev) => ({
+        ...prev,
+        message: "Se ha enviado un enlace de restablecimiento a tu correo.",
+        isSuccess: true,
+      }));
+      toast.success("Correo enviado correctamente.", {
+        icon: "📧",
+      });
     } catch (error) {
-      if (error instanceof Error) {
-        setMessage(`Ocurrió un error: ${error.message}`);
-      } else {
-        setMessage("Ocurrió un error inesperado. Inténtalo de nuevo.");
-      }
+      const errorMessage =
+        error instanceof Error ? error.message : "Ocurrió un error inesperado.";
+      setState((prev) => ({ ...prev, message: `Error: ${errorMessage}` }));
+      toast.error("No se pudo enviar el correo. Inténtalo de nuevo.");
     } finally {
-      setIsLoading(false);
+      setState((prev) => ({ ...prev, isLoading: false }));
     }
   };
 
@@ -52,7 +62,7 @@ const ForgotPassword = () => {
           ¿Olvidaste tu contraseña?
         </h2>
 
-        <form onSubmit={handleSubmit(onSubmit)} aria-disabled={isSuccess}>
+        <form onSubmit={handleSubmit(onSubmit)} aria-disabled={state.isSuccess}>
           <div className="mb-4">
             <label htmlFor="email" className="block text-sm font-medium text-gray-700 dark:text-gray-300">
               Correo electrónico
@@ -63,33 +73,30 @@ const ForgotPassword = () => {
               placeholder="Ingresa tu correo electrónico"
               {...register("email")}
               className="mt-1 w-full border p-2 rounded dark:bg-gray-700 dark:border-gray-600 dark:text-gray-200"
-              disabled={isSuccess}
+              disabled={state.isSuccess}
             />
-            {errors.email && (
-              <p className="mt-1 text-sm text-red-500">{errors.email.message}</p>
-            )}
+            {errors.email && <ErrorMessage message={errors.email.message} />}
           </div>
-
           <Button
             type="submit"
-            disabled={isLoading || isSuccess}
+            disabled={state.isLoading || state.isSuccess}
             className="w-full bg-yellow-500 text-white px-4 py-2 rounded hover:bg-yellow-600 disabled:bg-gray-400"
           >
-            {isLoading ? "Enviando..." : "Enviar enlace"}
+            {state.isLoading ? "Enviando..." : "Enviar enlace"}
           </Button>
         </form>
 
-        {message && (
+        {state.message && (
           <p
             className={`mt-4 text-center text-sm ${
-              isSuccess ? "text-green-600" : "text-red-500"
+              state.isSuccess ? "text-green-600" : "text-red-500"
             }`}
           >
-            {message}
+            {state.message}
           </p>
         )}
 
-        {!isSuccess && (
+        {!state.isSuccess && (
           <div className="mt-4 text-center">
             <Link
               to="/login"

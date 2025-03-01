@@ -6,6 +6,11 @@ import { useNavigate } from "react-router-dom";
 import { toast } from "react-hot-toast";
 import { useAppDispatch } from "@/hooks/useAppDispatch";
 import { RegisterUserDto } from "@/types/auth";
+import { useState } from "react";
+
+const ErrorMessage = ({ message }: { message: string | undefined }) => (
+  <p className="text-red-500 text-sm mt-1">{message}</p>
+);
 
 const Register = () => {
   const dispatch = useAppDispatch();
@@ -29,13 +34,21 @@ const Register = () => {
     resolver: yupResolver(validationSchema),
   });
 
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
   const onSubmit = async (data: RegisterUserDto) => {
+    setIsSubmitting(true);
     try {
       await dispatch(registerAsync(data)).unwrap();
-      toast.success("Registro exitoso. ¡Bienvenido!");
+      toast.success("Registro exitoso. ¡Bienvenido!", {
+        icon: "🎉",
+      });
       navigate("/login");
     } catch (error) {
-      toast.error("Error al registrarse. Por favor, intenta de nuevo. "+ error);
+      toast.error("Error al registrarse. Por favor, intenta de nuevo.");
+      console.error("Error al registrar usuario:", error);
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -44,7 +57,7 @@ const Register = () => {
       <div className="bg-white dark:bg-gray-800 p-8 rounded-lg shadow-md w-full max-w-md space-y-6">
         <h1 className="text-2xl font-bold text-center text-yellow-500">Registro</h1>
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
-          <div>
+        <div>
             <label className="block text-sm font-medium mb-2 text-gray-700 dark:text-gray-300">
               Nombre
             </label>
@@ -56,9 +69,7 @@ const Register = () => {
                 errors.name ? "border-red-500" : "border-gray-300"
               }`}
             />
-            {errors.name && (
-              <p className="text-red-500 text-sm mt-1">{errors.name.message}</p>
-            )}
+            {errors.name && <ErrorMessage message={errors.name.message} />}
           </div>
 
           <div>
@@ -73,9 +84,7 @@ const Register = () => {
                 errors.email ? "border-red-500" : "border-gray-300"
               }`}
             />
-            {errors.email && (
-              <p className="text-red-500 text-sm mt-1">{errors.email.message}</p>
-            )}
+            {errors.email && <ErrorMessage message={errors.email.message} />}
           </div>
 
           <div>
@@ -91,15 +100,16 @@ const Register = () => {
               }`}
             />
             {errors.passwordHash && (
-              <p className="text-red-500 text-sm mt-1">{errors.passwordHash.message}</p>
+              <ErrorMessage message={errors.passwordHash.message} />
             )}
           </div>
 
           <button
             type="submit"
-            className="w-full bg-yellow-500 text-white px-4 py-2 rounded hover:bg-yellow-600 transition-colors"
+            disabled={isSubmitting}
+            className="w-full bg-yellow-500 text-white px-4 py-2 rounded hover:bg-yellow-600 transition-colors disabled:bg-gray-400"
           >
-            Registrarse
+            {isSubmitting ? "Registrando..." : "Registrarse"}
           </button>
         </form>
         <p className="text-center text-gray-600 dark:text-gray-400">

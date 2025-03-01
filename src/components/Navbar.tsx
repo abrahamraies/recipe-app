@@ -5,7 +5,7 @@ import { useAuth } from "@/hooks/useAuth";
 
 const Navbar = () => {
 
-  const user = useAuth();
+  const auth = useAuth();
   const dispatch = useDispatch();
 
   return (
@@ -18,7 +18,7 @@ const Navbar = () => {
           <Link to="/recipes" className="hover:text-yellow-400 text-lg transition-colors">
             Recetas
           </Link>
-          {user ? (
+          {auth.user ? (
             <>
               <Link to="/favorites" className="hover:text-yellow-400">
                 Favoritos
