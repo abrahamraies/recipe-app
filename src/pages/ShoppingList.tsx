@@ -4,6 +4,7 @@ import { fetchShopListAsync, removeItemAsync } from "@/store/thunks/shoppingList
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Trash } from "lucide-react";
+import { toast } from "sonner";
 
 const ShoppingList = () => {
   const dispatch = useAppDispatch();
@@ -14,12 +15,23 @@ const ShoppingList = () => {
 
   useEffect(() => {
     if (user?.id) {
-      dispatch(fetchShopListAsync(user.id));
+      dispatch(fetchShopListAsync(user.id)).catch((err) => {
+        console.error("Error al cargar lista de compras:", err);
+        toast.error("Error al cargar la lista de compras.");
+      });
     }
   }, [dispatch, user?.id]);
 
   const handleRemoveItem = async (itemId: number) => {
-    await dispatch(removeItemAsync(itemId));
+    try {
+      await dispatch(removeItemAsync(itemId)).unwrap();
+      toast.success("Elemento eliminado correctamente.", {
+        icon: "🗑️",
+      });
+    } catch (err) {
+      console.error("Error al eliminar elemento:", err);
+      toast.error("Error al eliminar el elemento.");
+    }
   };
 
   if (loading) {

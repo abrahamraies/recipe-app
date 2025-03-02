@@ -4,6 +4,7 @@ import {
   addToShopList,
   removeFromShopList,
 } from "../../services/shoppingListService";
+import { handleApiError } from "../../services/api";
 
 export const fetchShopListAsync = createAsyncThunk(
   "shoppingList/fetch",
@@ -12,27 +13,22 @@ export const fetchShopListAsync = createAsyncThunk(
       const response = await getShopList(userId);
       return response;
     } catch (error) {
-      if (error && typeof error === "object" && "response" in error) {
-        const axiosError = error as { response?: { data: unknown } };
-        return rejectWithValue(axiosError.response?.data || "Error al cargar lista de compras");
-      }
-      return rejectWithValue("Error desconocido al cargar lista de compras");
+      return rejectWithValue(handleApiError(error));
     }
   }
 );
 
 export const addItemAsync = createAsyncThunk(
   "shoppingList/add",
-  async (itemData: { userId: number; itemId: number }, { dispatch, rejectWithValue }) => {
+  async (
+    itemData: { userId: number; itemId: number },
+    { dispatch, rejectWithValue }
+  ) => {
     try {
       await addToShopList(itemData);
       await dispatch(fetchShopListAsync(itemData.userId));
     } catch (error) {
-      if (error && typeof error === "object" && "response" in error) {
-        const axiosError = error as { response?: { data: unknown } };
-        return rejectWithValue(axiosError.response?.data || "Error al agregar elemento");
-      }
-      return rejectWithValue("Error desconocido al agregar elemento");
+      return rejectWithValue(handleApiError(error));
     }
   }
 );
@@ -44,11 +40,7 @@ export const removeItemAsync = createAsyncThunk(
       await removeFromShopList(itemId);
       return itemId;
     } catch (error) {
-      if (error && typeof error === "object" && "response" in error) {
-        const axiosError = error as { response?: { data: unknown } };
-        return rejectWithValue(axiosError.response?.data || "Error al quitar elemento");
-      }
-      return rejectWithValue("Error desconocido al quitar elemento");
+      return rejectWithValue(handleApiError(error));
     }
   }
 );
