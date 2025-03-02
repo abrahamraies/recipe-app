@@ -1,10 +1,10 @@
-import { createSlice, PayloadAction } from "@reduxjs/toolkit";
+import { createSlice } from "@reduxjs/toolkit";
 import {
-    fetchUserAsync,
-    updateUserAsync,
-    updateEmailAsync,
-    updatePasswordAsync,
-  } from "../thunks/userThunks";
+  fetchUserAsync,
+  updateUserAsync,
+  updateEmailAsync,
+  updatePasswordAsync,
+} from "../thunks/userThunks";
 
 interface UserState {
   loading: boolean;
@@ -16,72 +16,40 @@ const initialState: UserState = {
   error: null,
 };
 
-const userSlice = createSlice({
-  name: "user",
-  initialState,
-  reducers: {
-    updateStart: (state) => {
-      state.loading = true;
-      state.error = null;
-    },
-    updateSuccess: (state) => {
-      state.loading = false;
-      state.error = null;
-    },
-    updateFailure: (state, action: PayloadAction<string>) => {
-      state.loading = false;
-      state.error = action.payload;
-    },
+const createAsyncThunkHandler = (state: UserState) => ({
+  pending: () => {
+    state.loading = true;
+    state.error = null;
   },
-  extraReducers: (builder) => {
-    builder
-      .addCase(fetchUserAsync.pending, (state) => {
-        state.loading = true;
-        state.error = null;
-      })
-      .addCase(fetchUserAsync.fulfilled, (state) => {
-        state.loading = false;
-      })
-      .addCase(fetchUserAsync.rejected, (state, action) => {
-        state.loading = false;
-        state.error = action.payload as string;
-      })
-      .addCase(updateUserAsync.pending, (state) => {
-        state.loading = true;
-        state.error = null;
-      })
-      .addCase(updateUserAsync.fulfilled, (state) => {
-        state.loading = false;
-      })
-      .addCase(updateUserAsync.rejected, (state, action) => {
-        state.loading = false;
-        state.error = action.payload as string;
-      })
-      .addCase(updateEmailAsync.pending, (state) => {
-        state.loading = true;
-        state.error = null;
-      })
-      .addCase(updateEmailAsync.fulfilled, (state) => {
-        state.loading = false;
-      })
-      .addCase(updateEmailAsync.rejected, (state, action) => {
-        state.loading = false;
-        state.error = action.payload as string;
-      })
-      .addCase(updatePasswordAsync.pending, (state) => {
-        state.loading = true;
-        state.error = null;
-      })
-      .addCase(updatePasswordAsync.fulfilled, (state) => {
-        state.loading = false;
-      })
-      .addCase(updatePasswordAsync.rejected, (state, action) => {
-        state.loading = false;
-        state.error = action.payload as string;
-      });
+  fulfilled: () => {
+    state.loading = false;
+  },
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  rejected: (action: any) => {
+    state.loading = false;
+    state.error = action.payload as string;
   },
 });
 
-export const { updateStart, updateSuccess, updateFailure } = userSlice.actions;
+const userSlice = createSlice({
+  name: "user",
+  initialState,
+  reducers: {},
+  extraReducers: (builder) => {
+    builder
+      .addCase(fetchUserAsync.pending, createAsyncThunkHandler(initialState).pending)
+      .addCase(fetchUserAsync.fulfilled, createAsyncThunkHandler(initialState).fulfilled)
+      .addCase(fetchUserAsync.rejected, createAsyncThunkHandler(initialState).rejected)
+      .addCase(updateUserAsync.pending, createAsyncThunkHandler(initialState).pending)
+      .addCase(updateUserAsync.fulfilled, createAsyncThunkHandler(initialState).fulfilled)
+      .addCase(updateUserAsync.rejected, createAsyncThunkHandler(initialState).rejected)
+      .addCase(updateEmailAsync.pending, createAsyncThunkHandler(initialState).pending)
+      .addCase(updateEmailAsync.fulfilled, createAsyncThunkHandler(initialState).fulfilled)
+      .addCase(updateEmailAsync.rejected, createAsyncThunkHandler(initialState).rejected)
+      .addCase(updatePasswordAsync.pending, createAsyncThunkHandler(initialState).pending)
+      .addCase(updatePasswordAsync.fulfilled, createAsyncThunkHandler(initialState).fulfilled)
+      .addCase(updatePasswordAsync.rejected, createAsyncThunkHandler(initialState).rejected);
+  },
+});
 
 export default userSlice.reducer;

@@ -6,6 +6,7 @@ import {
   updatePassword,
 } from "../../services/userService";
 import { UpdateEmailDto, UpdatePasswordDto, UpdateUserDto } from "@/types/user";
+import { handleApiError } from "../../services/api";
 
 export const fetchUserAsync = createAsyncThunk(
   "user/fetch",
@@ -14,11 +15,7 @@ export const fetchUserAsync = createAsyncThunk(
       const response = await getUser(userId);
       return response;
     } catch (error) {
-      if (error && typeof error === "object" && "response" in error) {
-        const axiosError = error as { response?: { data: unknown } };
-        return rejectWithValue(axiosError.response?.data || "Error al obtener usuario");
-      }
-      return rejectWithValue("Error desconocido al obtener usuario");
+      return rejectWithValue(handleApiError(error));
     }
   }
 );
@@ -30,11 +27,7 @@ export const updateUserAsync = createAsyncThunk(
       const response = await updateUser(id, userData);
       return response;
     } catch (error) {
-      if (error && typeof error === "object" && "response" in error) {
-        const axiosError = error as { response?: { data: unknown } };
-        return rejectWithValue(axiosError.response?.data || "Error al actualizar usuario");
-      }
-      return rejectWithValue("Error desconocido al actualizar usuario");
+      return rejectWithValue(handleApiError(error));
     }
   }
 );
@@ -46,11 +39,7 @@ export const updateEmailAsync = createAsyncThunk(
       const response = await updateEmail(id, emailData);
       return response;
     } catch (error) {
-      if (error && typeof error === "object" && "response" in error) {
-        const axiosError = error as { response?: { data: unknown } };
-        return rejectWithValue(axiosError.response?.data || "Error al actualizar email");
-      }
-      return rejectWithValue("Error desconocido al actualizar email");
+      return rejectWithValue(handleApiError(error));
     }
   }
 );
@@ -62,11 +51,7 @@ export const updatePasswordAsync = createAsyncThunk(
       const response = await updatePassword(id, passwordData);
       return response;
     } catch (error) {
-      if (error && typeof error === "object" && "response" in error) {
-        const axiosError = error as { response?: { data: unknown } };
-        return rejectWithValue(axiosError.response?.data || "Error al actualizar contraseña");
-      }
-      return rejectWithValue("Error desconocido al actualizar contraseña");
+      return rejectWithValue(handleApiError(error));
     }
   }
 );

@@ -5,16 +5,19 @@ import { Card, CardContent } from "@/components/ui/card";
 import { useAppDispatch, useAppSelector } from "@/hooks/useAppDispatch";
 import { fetchRandomRecipesAsync } from "@/store/thunks/recipeThunks";
 import { RecipeDto } from "@/types/recipes";
-import React from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
+import { useLocalStorage } from "@/hooks/useLocalStorage";
+import { toast } from "sonner";
 
 const Home = () => {
   const dispatch = useAppDispatch();
   const { loading, error } = useAppSelector((state) => state.recipes);
   const user = useAuth();
-  const [localRandomRecipes, setLocalRandomRecipes] = React.useState<RecipeDto[]>([]);
   const navigate = useNavigate();
+
+  const [randomRecipes, setRandomRecipes] = useLocalStorage<RecipeDto[]>("randomRecipes", []);
+  const [lastUpdated, setLastUpdated] = useLocalStorage<string>("lastUpdated", "");
 
   const hasThreeDaysPassed = (lastUpdated: string): boolean => {
     const lastDate = new Date(lastUpdated);
@@ -25,39 +28,31 @@ const Home = () => {
   };
 
   useEffect(() => {
-    const storedRecipes = localStorage.getItem("randomRecipes");
-    const lastUpdated = localStorage.getItem("lastUpdated");
-
-    if (storedRecipes && lastUpdated && !hasThreeDaysPassed(lastUpdated)) {
-      try {
-        const parsedRecipes = JSON.parse(storedRecipes);
-        if (Array.isArray(parsedRecipes)) {
-          setLocalRandomRecipes(parsedRecipes);
-        } else {
-          console.error("Las recetas almacenadas no son un array válido.");
-        }
-      } catch (error) {
-        console.error("Error al cargar recetas desde localStorage:", error);
-        localStorage.removeItem("randomRecipes");
-      }
-    } else {
-      dispatch(fetchRandomRecipesAsync())
-        .unwrap()
-        .then((newRecipes) => {
-          setLocalRandomRecipes(newRecipes);
-          localStorage.setItem("randomRecipes", JSON.stringify(newRecipes));
-          localStorage.setItem("lastUpdated", new Date().toISOString());
-        })
-        .catch((err) => {
-          console.error("Error al cargar recetas aleatorias:", err);
-        });
+    if (randomRecipes.length > 0 && lastUpdated && !hasThreeDaysPassed(lastUpdated)) {
+      return;
     }
+
+    dispatch(fetchRandomRecipesAsync())
+      .unwrap()
+      .then((newRecipes) => {
+        setRandomRecipes(newRecipes);
+        setLastUpdated(new Date().toISOString());
+      })
+      .catch((err) => {
+        toast.error("Error al cargar recetas destacadas.");
+        console.log(err);
+      });
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [dispatch]);
 
   const handleFavoritesClick = () => {
     if (!user) {
-      alert("Debes iniciar sesión para ver tus recetas favoritas.");
-      navigate("/login"); 
+      toast.error("Debes iniciar sesión para ver tus recetas favoritas.", {
+        action: {
+          label: "Iniciar Sesión",
+          onClick: () => navigate("/login"),
+        },
+      });
     } else {
       navigate("/favorites");
     }
@@ -82,7 +77,9 @@ const Home = () => {
           className="bg-yellow-500 hover:bg-yellow-600 px-8 py-3 text-lg"
           asChild
         >
-          <Link to="/recipes" className="text-black">Explorar Recetas</Link>
+          <Link to="/recipes" className="text-black">
+          Explorar Recetas
+          </Link>
         </Button>
         <Button
           variant="secondary"
@@ -93,21 +90,23 @@ const Home = () => {
         </Button>
       </div>
       <div className="mt-12">
-        <h2 className="text-3xl font-bold mb-6 text-gray-700 dark:text-gray-200">Recetas Destacadas</h2>
+      <h2 className="text-3xl font-bold mb-6 text-gray-700 dark:text-gray-200">
+          Recetas Destacadas
+        </h2>
         {loading && (
           <p className="text-lg text-gray-500 dark:text-gray-300">Cargando recetas...</p>
         )}
         {error && (
           <p className="text-lg text-red-500">Error al cargar recetas: {error}</p>
         )}
-        {!loading && !error && localRandomRecipes.length > 0 ? (
+        {!loading && !error && randomRecipes.length > 0 ? (
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{ duration: 0.5 }}
             className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6"
           >
-            {localRandomRecipes.map((recipe) => (
+            {randomRecipes.map((recipe) => (
               <motion.div
                 key={recipe.id}
                 whileHover={{ scale: 1.05 }}

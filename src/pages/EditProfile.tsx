@@ -1,59 +1,69 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { useAppSelector } from "@/hooks/useAppDispatch";
+import { useAppSelector, useAppDispatch } from "@/hooks/useAppDispatch";
 import { updateUser, updateEmail, updatePassword } from "@/services/userService";
 import { Button } from "@/components/ui/button";
+import { toast } from "sonner";
+import { setCredentials } from "@/store/slices/authSlice";
 
 const EditProfile = () => {
   const navigate = useNavigate();
+  const dispatch = useAppDispatch();
   const user = useAppSelector((state) => state.auth.user);
   const [name, setName] = useState(user?.name || "");
   const [newEmail, setNewEmail] = useState("");
   const [currentPassword, setCurrentPassword] = useState("");
   const [newPassword, setNewPassword] = useState("");
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
 
   const handleUpdateName = async () => {
     if (!user?.id) return;
     setLoading(true);
-    setError(null);
     try {
       await updateUser(user.id, { name });
-      alert("Nombre actualizado correctamente");
+      toast.success("Nombre actualizado correctamente.", {
+        icon: "✅",
+      });
+      dispatch(setCredentials({ user: { ...user, name }, token: null }));
     } catch (err) {
-      setError("Error al actualizar el nombre");
       console.error("Error al actualizar el nombre:", err);
+      toast.error("Error al actualizar el nombre.");
     } finally {
       setLoading(false);
     }
   };
 
   const handleUpdateEmail = async () => {
-    if (!user?.id) return;
+    if (!user?.id || !newEmail) return;
     setLoading(true);
-    setError(null);
     try {
       await updateEmail(user.id, { newEmail });
-      alert("Correo electrónico actualizado correctamente");
+      toast.success("Correo electrónico actualizado correctamente.", {
+        icon: "📧",
+      });
+      dispatch(setCredentials({ user: { ...user, email: newEmail }, token: null }));
     } catch (err) {
-      setError("Error al actualizar el correo electrónico");
       console.error("Error al actualizar el correo electrónico:", err);
+      toast.error("Error al actualizar el correo electrónico.");
     } finally {
       setLoading(false);
     }
   };
 
   const handleUpdatePassword = async () => {
-    if (!user?.id) return;
+    if (!user?.id || !currentPassword || !newPassword) return;
     setLoading(true);
-    setError(null);
     try {
       await updatePassword(user.id, { currentPassword, newPassword });
-      alert("Contraseña actualizada correctamente");
+      toast.success("Contraseña actualizada correctamente.", {
+        icon: "🔒",
+      });
+
+      setCurrentPassword("");
+      setNewPassword("");
     } catch (err) {
-      setError("Error al actualizar la contraseña");
       console.error("Error al actualizar la contraseña:", err);
+      toast.error("Error al actualizar la contraseña.");
     } finally {
       setLoading(false);
     }
@@ -63,7 +73,6 @@ const EditProfile = () => {
     <div className="mt-8 p-4 md:p-6">
       <h1 className="text-3xl font-bold mb-6 text-center">Editar Perfil</h1>
 
-      {error && <p className="text-red-500 text-center mb-4">{error}</p>}
 
       <div className="mb-4">
         <label className="block text-gray-700 dark:text-gray-300 mb-2">Nombre</label>
@@ -74,7 +83,7 @@ const EditProfile = () => {
           className="w-full p-2 border rounded-md"
           disabled={loading}
         />
-        <Button onClick={handleUpdateName} className="mt-2" disabled={loading}>
+        <Button onClick={handleUpdateName} className="mt-2 w-full" disabled={loading}>
           {loading ? "Guardando..." : "Guardar Cambios"}
         </Button>
       </div>
@@ -88,7 +97,7 @@ const EditProfile = () => {
           className="w-full p-2 border rounded-md"
           disabled={loading}
         />
-        <Button onClick={handleUpdateEmail} className="mt-2" disabled={loading}>
+        <Button onClick={handleUpdateEmail} className="mt-2 w-full" disabled={loading}>
           {loading ? "Guardando..." : "Cambiar Correo Electrónico"}
         </Button>
       </div>
@@ -110,13 +119,16 @@ const EditProfile = () => {
           className="w-full p-2 border rounded-md"
           disabled={loading}
         />
-        <Button onClick={handleUpdatePassword} className="mt-2" disabled={loading}>
+        <Button onClick={handleUpdatePassword} className="mt-2 w-full" disabled={loading}>
           {loading ? "Guardando..." : "Cambiar Contraseña"}
         </Button>
       </div>
 
       <div className="mt-4">
-        <Button onClick={() => navigate("/profile")} className="w-full bg-gray-500 hover:bg-gray-600">
+        <Button
+          onClick={() => navigate("/profile")}
+          className="w-full bg-gray-500 hover:bg-gray-600"
+        >
           Volver al Perfil
         </Button>
       </div>

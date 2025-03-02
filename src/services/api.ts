@@ -11,3 +11,11 @@ api.interceptors.request.use((config) => {
   }
   return config;
 });
+
+export const handleApiError = (error: unknown) => {
+  if (error && typeof error === "object" && "response" in error) {
+    const axiosError = error as { response?: { data: unknown } };
+    throw new Error(JSON.stringify(axiosError.response?.data || "Error desconocido"));
+  }
+  throw new Error("Error desconocido");
+};

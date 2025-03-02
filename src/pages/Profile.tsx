@@ -3,6 +3,7 @@ import { logout } from "@/store/slices/authSlice";
 import { Button } from "@/components/ui/button";
 import { RootState } from "@/store/store";
 import { useNavigate } from "react-router-dom";
+import { toast } from "sonner";
 
 const Profile = () => {
   const user = useSelector((state: RootState) => state.auth.user);
@@ -10,11 +11,17 @@ const Profile = () => {
   const navigate = useNavigate();
 
   const handleLogout = () => {
-    dispatch(logout());
+    toast("Sesión cerrada correctamente.", {
+      icon: "👋",
+      action: {
+        label: "Aceptar",
+        onClick: () => dispatch(logout()),
+      },
+    });
   };
 
   if (!user) {
-    return <p className="text-center text-lg">No hay usuario logueado.</p>;
+    return null;
   }
 
   return (
@@ -31,10 +38,16 @@ const Profile = () => {
             <p className="mb-2"><strong>Email:</strong> {user.email}</p>
           </div>
           <div className="flex flex-col space-y-2">
-            <Button onClick={() => navigate("/edit-profile")} className="w-full bg-blue-500 hover:bg-blue-600">
+          <Button
+              onClick={() => navigate("/edit-profile")}
+              className="w-full bg-blue-500 hover:bg-blue-600"
+            >
               Editar Perfil
             </Button>
-            <Button onClick={handleLogout} className="w-full bg-red-500 hover:bg-red-600">
+            <Button
+              onClick={handleLogout}
+              className="w-full bg-red-500 hover:bg-red-600"
+            >
               Cerrar Sesión
             </Button>
           </div>
