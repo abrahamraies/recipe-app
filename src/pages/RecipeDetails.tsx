@@ -57,6 +57,9 @@ const RecipeDetails = () => {
         <h2 className="text-xl font-semibold mb-2">Tiempo de Preparación:</h2>
         <p className="text-gray-700 dark:text-gray-300">{recipe.preparationTime} minutos</p>
       </div>
+      <div className="mb-6">
+        <h2 className="text-xl" ><a className="text-gray-700 dark:text-gray-300 text-decoration-line: underline" href={recipe.recipeUrl}>Receta online</a></h2>
+      </div>
       <div className="flex justify-center">
         <Button
           onClick={() => navigate("/recipes")}
