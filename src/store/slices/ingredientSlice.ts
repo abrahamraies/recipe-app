@@ -9,31 +9,19 @@ import {
     searchResults: IngredientResponse[];
     loading: boolean;
     error: string | null;
-    currentPage: number;
-    totalPages: number;
-    pageSize: number;
   }
 
   const initialState: IngredientState = {
     ingredients: [],
     searchResults: [],
     loading: false,
-    error: null,
-    currentPage: 1,
-    totalPages: 1,
-    pageSize: 10,
+    error: null
   };  
 
 const ingredientSlice = createSlice({
   name: "ingredients",
   initialState,
   reducers: {
-    setCurrentPage: (state, action: PayloadAction<number>) => {
-      state.currentPage = action.payload;
-    },
-    setPageSize: (state, action: PayloadAction<number>) => {
-      state.pageSize = action.payload;
-    },
     fetchIngredientsStart: (state) => {
       state.loading = true;
       state.error = null;
@@ -72,8 +60,6 @@ const ingredientSlice = createSlice({
 });
 
 export const {
-  setCurrentPage,
-  setPageSize,
   fetchIngredientsStart,
   fetchIngredientsSuccess,
   fetchIngredientsFailure,

@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { fetchIngredientsAsync } from "@/store/thunks/ingredientThunks";
 import { Button } from "@/components/ui/button";
@@ -19,6 +19,7 @@ const IngredientSearch = () => {
   const user = useAppSelector((state) => state.auth.user);
   const { ingredients } = useAppSelector((state: RootState) => state.ingredients);
   const shoppingListItems = useAppSelector((state: RootState) => state.shoppingList.items);
+
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedIngredients, setSelectedIngredients] = useState<IngredientDto[]>([]);
   const [pageNumber, setPageNumber] = useState(1);
@@ -30,6 +31,22 @@ const IngredientSearch = () => {
       dispatch(fetchShopListAsync(user.id!));
     }
   }, [dispatch, user]);
+
+  const filteredIngredients = useMemo(() => {
+    return searchQuery.trim()
+      ? ingredients.filter((ingredient: IngredientDto) =>
+          ingredient.name.toLowerCase().includes(searchQuery.toLowerCase())
+        )
+      : ingredients;
+  }, [ingredients, searchQuery]);
+
+  const totalPages = Math.ceil(filteredIngredients.length / pageSize);
+  const paginatedIngredients = useMemo(() => {
+    return filteredIngredients.slice(
+      (pageNumber - 1) * pageSize,
+      pageNumber * pageSize
+    );
+  }, [filteredIngredients, pageNumber, pageSize]);
 
   const handleSelectIngredient = (ingredient: IngredientDto) => {
     if (!selectedIngredients.some((i) => i.id === ingredient.id)) {
@@ -75,26 +92,6 @@ const IngredientSearch = () => {
       console.error("Error al agregar al carrito:", error);
       toast.error("No se pudo agregar el ingrediente al carrito.");
     }
-  };
-
-  const filteredIngredients = searchQuery.trim()
-    ? ingredients.filter((ingredient: IngredientDto) =>
-        ingredient.name.toLowerCase().includes(searchQuery.toLowerCase())
-      )
-    : ingredients;
-
-  const totalPages = Math.ceil(filteredIngredients.length / pageSize);
-  const paginatedIngredients = filteredIngredients.slice(
-    (pageNumber - 1) * pageSize,
-    pageNumber * pageSize
-  );
-
-  const handlePrevPage = () => {
-    if (pageNumber > 1) setPageNumber(pageNumber - 1);
-  };
-
-  const handleNextPage = () => {
-    if (pageNumber < totalPages) setPageNumber(pageNumber + 1);
   };
 
   return (
@@ -145,7 +142,6 @@ const IngredientSearch = () => {
           const isAlreadyInCart = shoppingListItems.some(
             (item) => item.ingredient.id === ingredient.id
           );
-
           return (
             <Card key={ingredient.id} className="p-4 bg-white dark:bg-gray-800 shadow-md rounded-lg">
               <CardContent>
@@ -178,8 +174,7 @@ const IngredientSearch = () => {
       </div>
       <div className="flex justify-center mt-6 space-x-4">
         <Button
-          onClick={handlePrevPage}
-          disabled={pageNumber === 1}
+          onClick={() => setPageNumber((prev) => Math.max(prev - 1, 1))}
           className="bg-gray-200 text-gray-800 hover:bg-gray-300 dark:bg-gray-700 dark:text-white dark:hover:bg-gray-600"
         >
           Anterior
@@ -188,8 +183,7 @@ const IngredientSearch = () => {
           Página {pageNumber} de {totalPages}
         </span>
         <Button
-          onClick={handleNextPage}
-          disabled={pageNumber >= totalPages}
+          onClick={() => setPageNumber((prev) => Math.min(prev + 1, totalPages))}
           className="bg-gray-200 text-gray-800 hover:bg-gray-300 dark:bg-gray-700 dark:text-white dark:hover:bg-gray-600"
         >
           Siguiente
