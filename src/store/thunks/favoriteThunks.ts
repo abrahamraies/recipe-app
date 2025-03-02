@@ -2,8 +2,9 @@ import { createAsyncThunk } from "@reduxjs/toolkit";
 import {
   getFavorites,
   addFavorite,
-  removeFavorite
+  removeFavorite,
 } from "../../services/favoriteService";
+import { handleApiError } from "../../services/api";
 
 export const fetchFavoritesAsync = createAsyncThunk(
   "favorites/fetch",
@@ -12,11 +13,7 @@ export const fetchFavoritesAsync = createAsyncThunk(
       const response = await getFavorites(userId);
       return response;
     } catch (error) {
-        if (error && typeof error === "object" && "response" in error) {
-            const axiosError = error as { response?: { data: unknown } };
-            return rejectWithValue(axiosError.response?.data || "Error al cargar favoritos");
-          }
-          return rejectWithValue("Error desconocido al cargar favoritos");
+      return rejectWithValue(handleApiError(error));
     }
   }
 );
@@ -28,27 +25,19 @@ export const addFavoriteAsync = createAsyncThunk(
       const response = await addFavorite(userId, recipeId);
       return response;
     } catch (error) {
-      if (error && typeof error === "object" && "response" in error) {
-        const axiosError = error as { response?: { data: unknown } };
-        return rejectWithValue(axiosError.response?.data || "Error al agregar favorito");
-      }
-      return rejectWithValue("Error desconocido al agregar favorito");
+      return rejectWithValue(handleApiError(error));
     }
   }
 );
 
 export const removeFavoriteAsync = createAsyncThunk(
   "favorites/remove",
-  async ({ userId, recipeId }: { userId: number, recipeId: number }, { rejectWithValue }) => {
+  async ({ userId, recipeId }: { userId: number; recipeId: number }, { rejectWithValue }) => {
     try {
       const updatedFavorites = await removeFavorite(userId, recipeId);
       return updatedFavorites;
     } catch (error) {
-      if (error && typeof error === "object" && "response" in error) {
-        const axiosError = error as { response?: { data: unknown } };
-        return rejectWithValue(axiosError.response?.data || "Error al eliminar favorito");
-      }
-      return rejectWithValue("Error desconocido al eliminar favorito");
+      return rejectWithValue(handleApiError(error));
     }
   }
 );

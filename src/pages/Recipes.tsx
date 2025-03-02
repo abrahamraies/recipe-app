@@ -1,13 +1,11 @@
-import React, { useEffect, useState } from "react";
+import { useEffect, useState, useMemo } from "react";
 import { useAppDispatch, useAppSelector } from "@/hooks/useAppDispatch";
 import { fetchRecipesAsync } from "@/store/thunks/recipeThunks";
 import { Button } from "@/components/ui/button";
-import { RecipeDto } from "@/types/recipes";
 import { useNavigate } from "react-router-dom";
 import { Heart } from "lucide-react";
 import {
   addFavoriteAsync,
-  fetchFavoritesAsync,
   removeFavoriteAsync,
 } from "@/store/thunks/favoriteThunks";
 import { toast } from "sonner";
@@ -18,77 +16,57 @@ const Recipes = () => {
   const { allRecipes, loading, error } = useAppSelector((state) => state.recipes);
   const favorites = useAppSelector((state) => state.favorites.items);
   const user = useAppSelector((state) => state.auth.user);
+
   const [searchQuery, setSearchQuery] = useState("");
   const [pageNumber, setPageNumber] = useState(1);
   const pageSize = 10;
 
   useEffect(() => {
     dispatch(fetchRecipesAsync({ pageNumber: 1, pageSize: 1000 }));
-    if (user?.id) {
-      dispatch(fetchFavoritesAsync(user.id));
-    }
-  }, [dispatch, user?.id]);
+  }, [dispatch]);
 
-  const filteredRecipes = searchQuery.trim()
-    ? allRecipes.filter((recipe: RecipeDto) =>
-        recipe.title.toLowerCase().includes(searchQuery.toLowerCase())
-      )
-    : allRecipes;
+  const filteredRecipes = useMemo(() => {
+    return searchQuery.trim()
+      ? allRecipes.filter((recipe) =>
+          recipe.title.toLowerCase().includes(searchQuery.toLowerCase())
+        )
+      : allRecipes;
+  }, [allRecipes, searchQuery]);
 
   const totalPages = Math.ceil(filteredRecipes.length / pageSize);
-  const paginatedRecipes = filteredRecipes.slice(
-    (pageNumber - 1) * pageSize,
-    pageNumber * pageSize
+  const paginatedRecipes = useMemo(() => {
+    return filteredRecipes.slice(
+      (pageNumber - 1) * pageSize,
+      pageNumber * pageSize
+    );
+  }, [filteredRecipes, pageNumber, pageSize]);
+
+  const isFavorite = useMemo(
+    () => (recipeId: number) => {
+      return favorites.some((fav) => fav.recipe?.id === recipeId);
+    },
+    [favorites]
   );
-
-  const handleSearch = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setSearchQuery(e.target.value);
-    setPageNumber(1);
-  };
-
-  const handlePrevPage = () => {
-    if (pageNumber > 1) setPageNumber(pageNumber - 1);
-  };
-
-  const handleNextPage = () => {
-    if (pageNumber < totalPages) setPageNumber(pageNumber + 1);
-  };
-
-  const isFavorite = (recipeId: number) => {
-    return favorites.some((fav) => fav.recipe?.id === recipeId);
-  };
 
   const handleToggleFavorite = async (recipeId: number) => {
     if (!user) {
       toast.error("Debes iniciar sesión para agregar recetas a favoritos.");
       return;
     }
-  
+
     const favorite = favorites.find((fav) => fav.recipe?.id === recipeId);
-    if (favorite) {
-      try {
-        if (user.id) {
+    try {
+      if(user.id == null) return;
+      if (favorite) {
         await dispatch(removeFavoriteAsync({ userId: user.id, recipeId })).unwrap();
-      } else {
-        toast.error("User ID is undefined.");
-      }
         toast.success("Receta eliminada de favoritos.");
-      } catch (err) {
-        console.error("Error al eliminar de favoritos:", err);
-        toast.error("No se pudo eliminar la receta de favoritos.");
-      }
-    } else {
-      try {
-        if (user.id) {
-          await dispatch(addFavoriteAsync({ userId: user.id, recipeId })).unwrap();
-        } else {
-          toast.error("User ID is undefined.");
-        }
+      } else {
+        await dispatch(addFavoriteAsync({ userId: user.id, recipeId })).unwrap();
         toast.success("Receta agregada a favoritos.");
-      } catch (err) {
-        console.error("Error al agregar a favoritos:", err);
-        toast.error("No se pudo agregar la receta a favoritos.");
       }
+    } catch (err) {
+      console.error("Error al gestionar favoritos:", err);
+      toast.error("No se pudo completar la acción.");
     }
   };
 
@@ -98,7 +76,7 @@ const Recipes = () => {
       <input
         type="text"
         value={searchQuery}
-        onChange={handleSearch}
+        onChange={(e) => setSearchQuery(e.target.value)}
         placeholder="Buscar recetas..."
         className="w-full p-3 mb-6 border rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-yellow-400"
       />
@@ -118,7 +96,7 @@ const Recipes = () => {
               return (
                 <div
                   key={recipe.id}
-                  className="bg-white dark:bg-gray-800 shadow-lg rounded-xl overflow-hidden relative"
+                  className="bg-white dark:bg-gray-800 shadow-lg rounded-xl overflow-hidden relative cursor-pointer"
                   onClick={() => navigate(`/recipe/${recipe.id}`)}
                 >
                   <img
@@ -145,13 +123,15 @@ const Recipes = () => {
             })}
           </div>
           <div className="flex justify-center mt-6 space-x-4">
-            <Button onClick={handlePrevPage} disabled={pageNumber === 1}>
+            <Button onClick={() => setPageNumber((prev) => Math.max(prev - 1, 1))}>
               Anterior
             </Button>
             <span>
               Página {pageNumber} de {totalPages}
             </span>
-            <Button onClick={handleNextPage} disabled={pageNumber >= totalPages}>
+            <Button
+              onClick={() => setPageNumber((prev) => Math.min(prev + 1, totalPages))}
+            >
               Siguiente
             </Button>
           </div>
