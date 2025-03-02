@@ -110,11 +110,12 @@ const Home = () => {
               <motion.div
                 key={recipe.id}
                 whileHover={{ scale: 1.05 }}
-                className="card"
+                className="card cursor-pointer"
+              onClick={() => navigate(`/recipe/${recipe.id}`)}
               >
                 <Card>
                   <img
-                    src={recipe.imageUrl || "https://via.placeholder.com/300"}
+                    src={recipe.imageUrl}
                     alt={recipe.title}
                     className="w-full h-56 object-cover rounded-t-lg"
                   />
