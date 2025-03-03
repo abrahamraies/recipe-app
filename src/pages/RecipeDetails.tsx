@@ -31,7 +31,7 @@ const RecipeDetails = () => {
     <div className="mt-8 p-4 md:p-6">
       <h1 className="text-3xl font-bold mb-6 text-center">{recipe.title}</h1>
       <img
-        src={recipe.imageUrl || "https://via.placeholder.com/600x400"}
+        src={recipe.imageUrl}
         alt={recipe.title}
         className="w-full h-96 object-cover rounded-lg mb-6 sm:h-72"
       />

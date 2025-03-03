@@ -100,7 +100,7 @@ const Recipes = () => {
                   onClick={() => navigate(`/recipe/${recipe.id}`)}
                 >
                   <img
-                    src={recipe.imageUrl || "https://via.placeholder.com/300"}
+                    src={recipe.imageUrl}
                     alt={recipe.title}
                     className="w-full h-56 object-cover"
                   />

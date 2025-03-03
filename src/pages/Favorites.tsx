@@ -37,7 +37,7 @@ const Favorites = () => {
           {favorites.map((fav) => (
             <div key={fav.recipe?.id} className="bg-white dark:bg-gray-800 shadow-lg rounded-xl overflow-hidden">
               <img
-                src={fav.recipe?.imageUrl || "https://via.placeholder.com/300"}
+                src={fav.recipe?.imageUrl}
                 alt={fav.recipe?.title}
                 className="w-full h-56 object-cover"
               />
