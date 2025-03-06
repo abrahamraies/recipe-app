@@ -24,7 +24,7 @@ const VerifyEmail = () => {
           icon: "✅",
           action: {
             label: "Ir al inicio",
-            onClick: () => navigate("/"),
+            onClick: () => navigate("/login"),
           },
         });
       } catch (error) {
