@@ -27,3 +27,15 @@ export const forgotPassword = async (email: string) => {
     handleApiError(error);
   }
 };
+
+export const verifyEmail = async (token: string) => {
+  try {
+    const response = await api.get("/auth/verify-email", {
+      params: { token },
+    });
+    return response.data;
+  } catch (error) {
+    handleApiError(error);
+    throw error;
+  }
+};

@@ -17,6 +17,7 @@ import './index.css';
 import EditProfile from './pages/EditProfile';
 import IngredientSearch from './pages/IngredientSearch';
 import RecipeDetails from './pages/RecipeDetails';
+import VerifyEmail from './pages/Auth/VerifyEmail';
 
 function App() {
   return (
@@ -33,6 +34,7 @@ function App() {
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
           <Route path="/forgot-password" element={<ForgotPassword />} />
+          <Route path="/verify-email" element={<VerifyEmail />} />
           
           {/* Rutas Protegidas */}
           <Route element={<ProtectedRoute />}>
